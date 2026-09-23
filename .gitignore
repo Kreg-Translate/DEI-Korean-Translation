@@ -1,0 +1,8 @@
+node_modules/
+**/server.log
+**/workspace.json
+**/workspace.json.previous
+**/workspace.json.tmp
+**/collaboration-backups/
+**/exports/
+*.pack

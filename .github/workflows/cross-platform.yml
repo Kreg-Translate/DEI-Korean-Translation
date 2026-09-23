@@ -1,0 +1,42 @@
+name: Windows and Apple Silicon
+on:
+  push:
+    paths:
+      - 'DEI-Korean-Workbench-Cross-Platform-v1.2.zip'
+      - '.github/workflows/cross-platform.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-14]
+        node: ['22', '24']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Confirm native Apple Silicon runtime
+        if: runner.os == 'macOS'
+        run: node -e "console.log(process.platform, process.arch); if(process.arch !== 'arm64') process.exit(1)"
+      - name: Extract on macOS with executable permissions
+        if: runner.os == 'macOS'
+        run: |
+          unzip -q DEI-Korean-Workbench-Cross-Platform-v1.2.zip -d unpacked
+          test -x unpacked/DEI-Korean-Workbench-v1.2/DEI-Korean-Workbench/Start.command
+          test -x unpacked/DEI-Korean-Workbench-v1.2/DEI-Korean-Workbench/Stop.command
+      - name: Extract on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Expand-Archive -LiteralPath DEI-Korean-Workbench-Cross-Platform-v1.2.zip -DestinationPath unpacked
+      - name: Verify backup, Unicode, merge, and portable launchers
+        working-directory: unpacked/DEI-Korean-Workbench-v1.2/DEI-Korean-Workbench
+        run: node --test tests/*.test.mjs

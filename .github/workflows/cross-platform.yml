@@ -40,3 +40,7 @@ jobs:
       - name: Verify backup, Unicode, merge, and portable launchers
         working-directory: unpacked/DEI-Korean-Workbench-v1.2/DEI-Korean-Workbench
         run: node --test tests/*.test.mjs
+      - name: Show isolated launcher diagnostics on failure
+        if: failure()
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; for(const name of fs.readdirSync(os.tmpdir()).filter(n=>n.startsWith('dei '))){ const root=path.join(os.tmpdir(),name); for(const file of ['data/server.log','public/index.html']){ const p=path.join(root,file); if(fs.existsSync(p)){ const text=fs.readFileSync(p,'utf8'); console.log(file, text.length, file.endsWith('.log') ? text : text.slice(0,1600)); } } }"

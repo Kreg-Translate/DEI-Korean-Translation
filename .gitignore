@@ -6,3 +6,5 @@ node_modules/
 **/collaboration-backups/
 **/exports/
 *.pack
+
+**/config.local.json
